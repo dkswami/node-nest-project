@@ -1,9 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { ItemData } from './interfaces/item.interface'
+import { Model } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class ItemsService {
-	private readonly allItems: ItemData[] = [
+	constructor(@InjectModel('MyItem') private readonly itemModel: Model<ItemData>) {}
+
+	async findAll(): Promise<ItemData[]> {
+		return await this.itemModel.find();
+	}
+
+	async findOne(id: string): Promise<ItemData> {
+		return await this.itemModel.findOne({ _id: id});
+	}
+
+	async create(item: ItemData): Promise<ItemData> {
+		const newItem = new this.itemModel(item);
+		return await newItem.save();
+	}
+
+	async delete(id: string): Promise<ItemData> {
+		return await this.itemModel.findByIdAndRemove(id);
+	}
+
+	async update(id: string, item: ItemData): Promise<ItemData> {
+		return await this.itemModel.findByIdAndUpdate(id, item, { new: true });
+	}
+
+/* 	private readonly allItems: ItemData[] = [
 		{
 			id: "2345454",
 			name: "Item One",
@@ -32,8 +57,8 @@ export class ItemsService {
 		return this.allItems.find(item => item.id === id);
 	}
 
-	// create(newItem: ItemData): promise<ItemData> {
-	// 	return this.allItems.push(newItem);
-	// }
-
+	create(newItem: ItemData): void {
+		this.allItems.push(newItem);
+	}
+ */
 }
